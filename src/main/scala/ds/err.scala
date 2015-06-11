@@ -90,12 +90,24 @@ trait Either[+E, +A] {
   // Either that operate on the Right value.
   def map[B](f: A => B): Either[E, B] =
     this match {
-      case Right(a) => Try(f(a))
-      case _ => this
+      case Right(a) => try Right(f(a)) catch { case e: E => Left(e) } // ???
+      case Left(e) => Left(e) // ??? Cast Right to Nothing
     }
-  def flatMap[EE >: E, B](f: A => Either[EE, B]): Either[EE, B]
-  def orElse[EE >: E,B >: A](b: => Either[EE, B]): Either[EE, B]
-  def map2[EE >: E, B, C](b: Either[EE, B])(f: (A, B) => C): Either[EE, C]
+  def flatMap[EE >: E, B](f: A => Either[EE, B]): Either[EE, B] =
+    this match {
+      case Right(a) => try Right(f(a))
+      case Left(e) => Left(e)
+    }
+  def orElse[EE >: E,B >: A](b: => Either[EE, B]): Either[EE, B] =
+    this match {
+      case Right(a) => Right(a)
+      case Left(_) => b // ??? Double-check
+    }
+  def map2[EE >: E, B, C](b: Either[EE, B])(f: (A, B) => C): Either[EE, C] =
+    (this, b) match {
+      case (Right(aa), Right(bb)) => try Right(f(aa,bb)) catch { case e: E => Left(e) }
+      case Left(ee) => Left(ee)
+    }
 
 }
 case class Left[+E](value: E) extends Either[E, Nothing]
