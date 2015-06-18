@@ -1,6 +1,5 @@
 initialCommands in console := """
-  import err._
-  import Option._
-  import Ops._
+  import laziness._
+  import Stream._
   import testCases._
 """
