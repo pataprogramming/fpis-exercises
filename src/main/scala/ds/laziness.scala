@@ -156,7 +156,7 @@ sealed trait Stream[+A] {
       case (None, Some(_)) => false
       case (_, None) => true
       case (Some(a1), Some(a2)) => a1 == a2
-    }.foldRight(true)(_ & _)
+    }.foldRight(true)(_ && _)
 
   // Exercise 5.15 Implement tails using unfold. For a given Stream, tails
   // returns the Stream of suffixes of the input sequence, starting with the
@@ -187,6 +187,7 @@ sealed trait Stream[+A] {
         case Cons(_, t) => Some(s, Some(t()))
       }))
   // This version actually ran the first try!
+  // Can't easily get rid of the 's match' since we need to use the 's' in the second case
 
 
   // Exercise 5.16: Hard. Generalize tails to the function scanRight, which is
@@ -196,6 +197,15 @@ sealed trait Stream[+A] {
   // using unfold? How, or why not? Could it be implemented using another function
   // we've written?
 
+  def scanRight[B](z: => B)(f: (A, => B) => B): Stream[B] =
+    unfold((this, z)){
+      case (Empty, _) => None
+      case (Cons(ah, at), z) => {
+        val zz = f(ah(), z)
+        Some((zz, (at(), zz)))
+      }
+    }
+  // Slightly tricky, but not as hard as 5.15, I though.
 
 }
 case object Empty extends Stream[Nothing]
@@ -246,8 +256,8 @@ object Stream {
       case None => Empty
       case Some((a,ss)) => cons(a, unfold(ss)(f))
     }
-  // The type definition is interesting, and resulting in an implementation with
-  // fewer special cases than my original approach.
+  // The type definition is interesting, and resulted in an implementation with
+  // fewer special cases than my original idea for approaching this exercise
 
   // Exercise 5.12: Write fibs, from, constant, and ones in terms of unfold.
   def fibsU: Stream[Int] =

@@ -233,9 +233,17 @@ object List {
 
   // Exercise 3.24: Implent hasSubsequence for checking whether a List
   // contains another List as a subsequence.
-  // def hasSubsequence[A](l: List[A], sub: List[A]): Boolean = {
-  //   def recur(l1,
-  //}
+  def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean = {
+    def recur(sup: List[A], sub: List[A]): Boolean = {
+      (sup, sub) match {
+        case (_, Empty) => true
+        case (Empty, Cons(_,_)) => false
+        case (Cons(suph, supt), Cons(subh, subt)) =>
+          (suph == supt) && hasSubsequence(suph, supt)
+      }}
+  }
+
+
 
 }
 
